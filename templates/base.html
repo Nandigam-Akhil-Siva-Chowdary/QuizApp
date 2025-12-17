@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Quiz{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CSS -->
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+
+  <!-- Quiz-specific CSS -->
+  <link href="{% static 'css/quiz.css' %}" rel="stylesheet">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- GLOBAL MESSAGES -->
+  {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+      {% for message in messages %}
+        <div class="px-4 py-2 rounded shadow
+          {% if message.tags == 'error' %}
+            bg-red-600 text-white
+          {% elif message.tags == 'success' %}
+            bg-green-600 text-white
+          {% else %}
+            bg-gray-800 text-white
+          {% endif %}
+        ">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- PAGE CONTENT -->
+  {% block content %}{% endblock %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

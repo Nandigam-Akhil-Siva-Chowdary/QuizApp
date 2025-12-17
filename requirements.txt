@@ -1,0 +1,11 @@
+Django
+djongo
+pymongo
+dnspython
+python-dotenv
+cloudinary
+Pillow
+reportlab
+gunicorn
+sqlparse
+django-cloudinary-storage

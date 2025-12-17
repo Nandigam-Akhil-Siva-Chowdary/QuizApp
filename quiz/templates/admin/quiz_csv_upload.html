@@ -1,0 +1,107 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+  <h1 class="text-2xl font-semibold mb-4">
+    Upload Questions via CSV – {{ quiz.title }}
+  </h1>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mb-4 p-3 rounded bg-red-100 text-red-800">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- CSV Upload Form -->
+  <form method="post" enctype="multipart/form-data" class="mb-8">
+    {% csrf_token %}
+    <div class="flex items-end gap-4">
+      <div class="flex-1">
+        {{ form.csv_file.label_tag }}
+        {{ form.csv_file }}
+        {% for error in form.csv_file.errors %}
+          <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+      <button
+        type="submit"
+        class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Upload
+      </button>
+    </div>
+  </form>
+
+  <!-- Errors -->
+  {% if errors %}
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold mb-2 text-red-600">
+        CSV Errors Found
+      </h2>
+      <ul class="list-disc pl-6 text-red-700">
+        {% for error in errors %}
+          <li>
+            Row {{ error.row }}:
+            {{ error.errors|join:", " }}
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="mt-3 text-sm text-gray-600">
+        You can re-upload the CSV or continue by manually fixing fields below.
+      </p>
+    </div>
+  {% endif %}
+
+  <!-- Preview -->
+  {% if preview_data %}
+    <h2 class="text-xl font-semibold mb-3">Preview Questions</h2>
+
+    <div class="space-y-4">
+      {% for row in preview_data %}
+        <div class="border rounded p-4">
+          <p class="font-medium mb-1">
+            {{ forloop.counter }}. {{ row.question_text }}
+          </p>
+          <p class="text-sm text-gray-600 mb-2">
+            Type: {{ row.question_type|capfirst }}
+          </p>
+          <ul class="list-disc pl-6">
+            {% for opt in row.options %}
+              <li>{{ opt }}</li>
+            {% endfor %}
+          </ul>
+          <p class="mt-2 text-sm text-green-700">
+            Correct:
+            {{ row.correct_options|join:", " }}
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Confirm -->
+    <div class="mt-6 flex items-center gap-4">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create" />
+        <input type="hidden" name="preview_json" value="{{ preview_json|default:'' }}"/>
+        <button
+          type="submit"
+          class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          {% if has_errors %}disabled class="opacity-50 cursor-not-allowed"{% endif %}
+        >
+          Create Questions
+        </button>
+      </form>
+      <a
+        href="{% url 'quiz:quiz_edit' quiz.id %}"
+        class="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        Cancel / Edit Manually
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+  <h1 class="text-2xl font-semibold mb-4">
+    Certificate Review – {{ quiz.title }}
+  </h1>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" id="certificate-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="cert-action" value="review" />
+
+    <!-- Canva Background -->
+    <div class="mb-6">
+      <label class="block font-medium mb-2">
+        Canva Background (PNG/JPG URL)
+      </label>
+      <input
+        type="url"
+        name="background_url"
+        value="{{ background_url|default:'' }}"
+        required
+        class="w-full p-2 border rounded"
+        placeholder="https://res.cloudinary.com/.../certificate_bg.png"
+      />
+      <p class="text-sm text-gray-500 mt-1">
+        Upload the design to Cloudinary and paste the URL here.
+      </p>
+    </div>
+
+    <!-- Eligible Teams -->
+    <div class="border rounded overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3">
+              <input type="checkbox" id="select-all" />
+            </th>
+            <th class="p-3">Team Code</th>
+            <th class="p-3">Team Lead Email</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Email To</th>
+            <th class="p-3">Roll / College</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attempt in eligible_attempts %}
+          <tr class="border-t">
+            <td class="p-3">
+              {% if attempt.team_code not in existing_certificates %}
+                <input
+                  type="checkbox"
+                  name="team_codes"
+                  value="{{ attempt.team_code }}"
+                  class="team-checkbox"
+                />
+              {% else %}
+                <span class="text-gray-400">✓</span>
+              {% endif %}
+            </td>
+            <td class="p-3 font-medium">
+              {{ attempt.team_code }}
+            </td>
+            <td class="p-3">
+              {{ attempt.team_lead_email }}
+            </td>
+            <td class="p-3">
+              {% if attempt.team_code in existing_certificates %}
+                <span class="text-green-600">Sent</span>
+              {% else %}
+                <span class="text-yellow-600">Pending</span>
+              {% endif %}
+            </td>
+            <td class="p-3 text-sm">
+              {{ attempt.team_lead_email }}
+            </td>
+            <td class="p-3 text-sm">
+              {{ attempt.roll_number|default:"-" }}<br/>
+              {{ attempt.college_name|default:"-" }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="p-4 text-center text-gray-500">
+              No eligible attempts found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Submit -->
+    <div class="mt-6 flex gap-3 items-center">
+      <button
+        type="submit"
+        class="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        onclick="document.getElementById('cert-action').value='review'"
+      >
+        Review Selection
+      </button>
+      <button
+        type="submit"
+        class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        onclick="document.getElementById('cert-action').value='send'"
+      >
+        Send Certificates
+      </button>
+      <p class="text-sm text-gray-600" id="selected-count"></p>
+    </div>
+  </form>
+
+  {% if review_selected and selected_attempts %}
+    <div class="mt-8 border rounded p-4 bg-gray-50">
+      <h2 class="text-lg font-semibold mb-3">You are about to send to:</h2>
+      <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+        {% for att in selected_attempts %}
+          <li>
+            {{ att.team_code }} → {{ att.team_lead_email }}
+            (Roll: {{ att.roll_number|default:"-" }}, College: {{ att.college_name|default:"-" }})
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="text-sm text-gray-600 mt-3">
+        Confirm and click "Send Certificates" to deliver to the listed emails.
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Select all checkboxes
+  document.getElementById("select-all")?.addEventListener("change", function () {
+    document.querySelectorAll(".team-checkbox").forEach(cb => {
+      cb.checked = this.checked;
+    });
+  });
+
+  function updateSelectedCount() {
+    const count = document.querySelectorAll(".team-checkbox:checked").length;
+    const lbl = document.getElementById("selected-count");
+    if (lbl) {
+      lbl.textContent = count > 0 ? `${count} team(s) selected` : "No teams selected";
+    }
+  }
+
+  document.querySelectorAll(".team-checkbox").forEach(cb => {
+    cb.addEventListener("change", updateSelectedCount);
+  });
+  updateSelectedCount();
+</script>
+{% endblock %}

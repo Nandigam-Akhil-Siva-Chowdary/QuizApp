@@ -1,0 +1,147 @@
+/* =========================
+   GLOBAL QUIZ BEHAVIOR
+========================= */
+
+/* Disable text selection */
+body,
+.quiz-question,
+.quiz-question * {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Disable image dragging */
+img {
+  pointer-events: none;
+}
+
+/* =========================
+   QUESTION STATES (RIGHT PANEL)
+========================= */
+
+/* Not visited */
+.question-nav-btn.not-visited {
+  background-color: #9ca3af; /* gray-400 */
+}
+
+/* Visited but not answered */
+.question-nav-btn.visited {
+  background-color: #f59e0b; /* amber-500 */
+}
+
+/* Answered */
+.question-nav-btn.answered {
+  background-color: #16a34a; /* green-600 */
+}
+
+/* Marked for review */
+.question-nav-btn.review {
+  background-color: #7c3aed; /* violet-600 */
+}
+
+/* Current question */
+.question-nav-btn.active {
+  outline: 3px solid #2563eb; /* blue-600 */
+}
+
+/* Hover effect */
+.question-nav-btn:hover {
+  filter: brightness(1.1);
+  cursor: pointer;
+}
+
+/* =========================
+   TIMER
+========================= */
+
+#quiz-timer {
+  letter-spacing: 1px;
+}
+
+/* Warning animation */
+.timer-warning {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* =========================
+   FULLSCREEN WARNING
+========================= */
+
+.fullscreen-warning {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.fullscreen-warning-box {
+  background: #111827; /* gray-900 */
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 400px;
+}
+
+/* =========================
+   COPY / CHEAT WARNING
+========================= */
+
+.cheat-warning {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #dc2626; /* red-600 */
+  color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* =========================
+   FORM ELEMENT TWEAKS
+========================= */
+
+/* Prevent radio/checkbox highlight drag */
+input[type="radio"],
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* =========================
+   MOBILE SAFETY
+========================= */
+
+@media (max-width: 768px) {
+  .quiz-question {
+    font-size: 14px;
+  }
+
+  .question-nav-btn {
+    font-size: 12px;
+    padding: 4px 0;
+  }
+}

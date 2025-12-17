@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ quiz.title }} – Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+  <div class="max-w-5xl mx-auto p-6">
+
+    <div class="bg-white rounded shadow p-6">
+      <h1 class="text-2xl font-semibold mb-4">
+        {{ quiz.title }} – Result
+      </h1>
+
+      <!-- Case 1: Results NOT available -->
+      {% if not results_available %}
+        <div class="p-4 bg-yellow-100 text-yellow-800 rounded">
+          <p class="font-medium">
+            Your attempt has been submitted successfully.
+          </p>
+          <p class="mt-2 text-sm">
+            Results will be published later by the admin.
+          </p>
+        </div>
+
+        <div class="mt-6">
+          <a
+            href="{% url 'quiz:quiz_home' %}"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Go to Home
+          </a>
+        </div>
+
+      {% else %}
+      <!-- Case 2: Results available -->
+
+        {% for item in result_data %}
+          <div class="mb-5 border rounded p-4
+            {% if item.is_correct %}
+              bg-green-50 border-green-300
+            {% else %}
+              bg-red-50 border-red-300
+            {% endif %}
+          ">
+            <h2 class="font-semibold mb-2">
+              {{ forloop.counter }}. {{ item.question }}
+            </h2>
+
+            <p class="mb-2">
+              <strong>Your Answer:</strong>
+              {{ item.selected|join:", " }}
+            </p>
+
+            <p class="mb-2">
+              <strong>Correct Answer:</strong>
+              {{ item.correct|join:", " }}
+            </p>
+
+            {% if item.is_correct %}
+              {% if item.explanation_correct %}
+                <p class="text-sm text-green-800 mt-2">
+                  {{ item.explanation_correct }}
+                </p>
+              {% endif %}
+            {% else %}
+              {% if item.explanation_wrong %}
+                <p class="text-sm text-red-800 mt-2">
+                  {{ item.explanation_wrong }}
+                </p>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="mt-6">
+          <a
+            href="{% url 'quiz:quiz_home' %}"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Go to Home
+          </a>
+        </div>
+
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
