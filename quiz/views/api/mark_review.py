@@ -27,7 +27,8 @@ def mark_review_view(request):
             status=QuizAttempt.STATUS_ACTIVE,
         )
 
-        question = QuizQuestion.objects.get(id=question_id)
+        # Use pk for Djongo primary key compatibility
+        question = QuizQuestion.objects.get(pk=question_id)
 
         answer, _ = QuizAnswer.objects.get_or_create(
             attempt=attempt,

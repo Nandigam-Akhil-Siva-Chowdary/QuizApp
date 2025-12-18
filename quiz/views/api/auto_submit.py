@@ -22,7 +22,8 @@ def auto_submit_view(request):
             status=QuizAttempt.STATUS_ACTIVE
         )
 
-        quiz = Quiz.objects.get(id=attempt.quiz_id)
+        # Quiz uses integer primary key
+        quiz = Quiz.objects.get(pk=attempt.quiz_id)
 
         AttemptService.submit_attempt(attempt, auto=True)
 

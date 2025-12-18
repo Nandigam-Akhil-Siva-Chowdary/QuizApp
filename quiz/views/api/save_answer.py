@@ -28,7 +28,9 @@ def save_answer_view(request):
             status=QuizAttempt.STATUS_ACTIVE,
         )
 
-        question = QuizQuestion.objects.get(id=question_id)
+        # QuizQuestion uses an ObjectId primary key in Djongo migrations,
+        # so use pk lookups instead of .id
+        question = QuizQuestion.objects.get(pk=question_id)
 
         answer, _ = QuizAnswer.objects.get_or_create(
             attempt=attempt,

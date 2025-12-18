@@ -23,11 +23,23 @@
         attempt_id: attemptId || "",
       }),
     })
-      .then(() => {
-        window.location.href = window.SUBMIT_REDIRECT_URL;
+      .then((response) => {
+        if (response.ok || response.redirected) {
+          // Submission successful - redirect to result or home
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            window.location.href = window.SUBMIT_REDIRECT_URL || window.QUIZ_HOME_URL;
+          }
+        } else {
+          throw new Error("Submission failed");
+        }
       })
       .catch(() => {
-        alert("Submission failed. Please wait, do not refresh.");
+        alert("Submission failed. Please try again.");
+        submitted = false;
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit";
       });
   }
 

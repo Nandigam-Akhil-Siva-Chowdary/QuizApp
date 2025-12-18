@@ -10,3 +10,4 @@ gunicorn
 sqlparse
 django-cloudinary-storage
 requests
+pytx

@@ -18,14 +18,23 @@ def quiz_submit_view(request):
         return redirect("quiz:quiz_home")
 
     attempt = get_object_or_404(QuizAttempt, id=ObjectId(attempt_id))
-    quiz = get_object_or_404(Quiz, id=attempt.quiz_id)
+    quiz = get_object_or_404(Quiz, pk=attempt.quiz_id)
 
     if attempt.status != QuizAttempt.STATUS_ACTIVE:
         # Already submitted or disqualified
-        return redirect("quiz:quiz_result", attempt_id=str(attempt.id))
+        if quiz.allow_immediate_results:
+            return redirect("quiz:quiz_result", attempt_id=str(attempt.id))
+        else:
+            messages.info(request, "Your quiz has been submitted. Results will be available later.")
+            return redirect("quiz:quiz_home")
 
     AttemptService.submit_attempt(attempt, auto=False)
 
     messages.success(request, "Quiz submitted successfully.")
 
-    return redirect("quiz:quiz_result", attempt_id=str(attempt.id))
+    # Redirect based on quiz settings
+    if quiz.allow_immediate_results:
+        return redirect("quiz:quiz_result", attempt_id=str(attempt.id))
+    else:
+        messages.info(request, "Your answers have been saved. Results will be available later.")
+        return redirect("quiz:quiz_home")

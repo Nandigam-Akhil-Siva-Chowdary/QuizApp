@@ -65,7 +65,8 @@ class QuizService:
             QuizQuestion.objects.filter(quiz_id=quiz.id)
         )
 
-        question_ids = [str(q.id) for q in questions]
+        # Use primary key (pk) instead of direct .id to be compatible with Djongo
+        question_ids = [str(q.pk) for q in questions]
 
         # Shuffle questions if enabled
         if quiz.shuffle_questions:
@@ -75,12 +76,19 @@ class QuizService:
 
         for q in questions:
             # options are stored as list of dicts, not model instances
-            option_ids = [opt.get("text") for opt in q.options if opt.get("text")]
+            # Some questions may have options=None or an empty list if misconfigured;
+            # handle that gracefully to avoid 500 errors.
+            raw_options = q.options or []
+            option_ids = [
+                opt.get("text")
+                for opt in raw_options
+                if isinstance(opt, dict) and opt.get("text")
+            ]
 
-            if quiz.shuffle_options:
+            if quiz.shuffle_options and option_ids:
                 random.shuffle(option_ids)
 
-            option_order_map[str(q.id)] = option_ids
+            option_order_map[str(q.pk)] = option_ids
 
         attempt = QuizAttempt.objects.create(
             quiz_id=quiz.id,
@@ -106,7 +114,8 @@ class QuizService:
             quiz_id=attempt.quiz_id
         )
 
-        question_map = {str(q.id): q for q in questions}
+        # Map by primary key string to match what we stored in question_order
+        question_map = {str(q.pk): q for q in questions}
 
         ordered_questions = []
         for qid in attempt.question_order:

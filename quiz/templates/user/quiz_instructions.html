@@ -47,6 +47,19 @@
         </ul>
       </div>
 
+      <!-- Attempts Info -->
+      {% if remaining_attempts is not None %}
+        <div class="mb-4 text-sm text-gray-700">
+          Attempts used: <strong>{{ used_attempts }}</strong> /
+          <strong>{{ quiz.max_attempts }}</strong>.
+          {% if remaining_attempts > 0 %}
+            You still have <strong>{{ remaining_attempts }}</strong> attempt(s) left.
+          {% else %}
+            You have used all allowed attempts for this quiz.
+          {% endif %}
+        </div>
+      {% endif %}
+
       <!-- Start Button -->
       <div class="flex justify-between items-center">
         <a
@@ -56,12 +69,22 @@
           ← Back
         </a>
 
-        <a
-          href="{% url 'quiz:quiz_attempt' quiz.id %}"
-          class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Start Quiz
-        </a>
+        {% if can_attempt %}
+          <a
+            href="{% url 'quiz:quiz_attempt' quiz.id %}"
+            class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Start Quiz
+          </a>
+        {% else %}
+          <button
+            type="button"
+            class="px-6 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
+            disabled
+          >
+            No Attempts Left
+          </button>
+        {% endif %}
       </div>
     </div>
   </div>

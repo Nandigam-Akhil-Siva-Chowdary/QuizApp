@@ -19,7 +19,10 @@ class QuizQuestion(models.Model):
         (MULTIPLE, "Multiple Answer"),
     )
 
-    # Use Djongo's ObjectIdField for MongoDB ObjectIds
+    # Django will auto-create 'id' field which Djongo maps to MongoDB's '_id'
+    # We don't need to explicitly define it
+    
+    # Reference to quiz (this is just a foreign reference, NOT the primary key)
     quiz_id = djongo_models.ObjectIdField()
     question_text = models.TextField()
 

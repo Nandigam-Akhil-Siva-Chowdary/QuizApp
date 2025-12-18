@@ -33,7 +33,7 @@
   <!-- Question Area -->
   <div class="flex-1 bg-white rounded shadow p-6">
     {% for question in questions %}
-      <div class="quiz-question hidden" data-question-id="{{ question.id }}">
+      <div class="quiz-question hidden" data-question-id="{{ question.pk }}">
 
         <h2 class="text-lg font-semibold mb-3">
           {{ forloop.counter }}. {{ question.question_text }}
@@ -56,10 +56,10 @@
                 {% else %}
                   type="radio"
                 {% endif %}
-                name="question_{{ question.id }}"
+                name="question_{{ question.pk }}"
                 value="{{ opt.text|default:opt.id }}"
                 class="w-4 h-4 answer-input"
-                data-question-id="{{ question.id }}"
+                data-question-id="{{ question.pk }}"
               />
               <span>{{ opt.text|default:opt.id }}</span>
             </label>
@@ -104,7 +104,7 @@
       {% for question in questions %}
         <button
           class="question-nav-btn bg-gray-400 text-white rounded py-1 text-sm"
-          data-question-id="{{ question.id }}"
+          data-question-id="{{ question.pk }}"
         >
           {{ forloop.counter }}
         </button>
@@ -136,12 +136,12 @@
 </script>
 
 <!-- CORE JS -->
-<script src="{% static 'quiz/js/quiz_timer.js' %}"></script>
-<script src="{% static 'quiz/js/fullscreen.js' %}"></script>
-<script src="{% static 'quiz/js/anti_cheat.js' %}"></script>
-<script src="{% static 'quiz/js/devtools_detect.js' %}"></script>
-<script src="{% static 'quiz/js/navigation.js' %}"></script>
-<script src="{% static 'quiz/js/submit.js' %}"></script>
+<script src="{% static 'js/quiz_timer.js' %}"></script>
+<script src="{% static 'js/fullscreen.js' %}"></script>
+<script src="{% static 'js/anti_cheat.js' %}"></script>
+<script src="{% static 'js/devtools_detect.js' %}"></script>
+<script src="{% static 'js/navigation.js' %}"></script>
+<script src="{% static 'js/submit.js' %}"></script>
 
 </body>
 </html>
