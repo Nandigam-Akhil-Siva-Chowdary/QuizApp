@@ -1,0 +1,323 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6">
+  <h1 class="text-3xl font-semibold mb-6">Create New Quiz</h1>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mb-4 p-3 rounded {% if message.tags == 'error' %}bg-red-100 text-red-800{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="quizForm" class="space-y-6">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="preview" id="actionInput">
+    <input type="hidden" name="questions_json" value="{{ preview_json }}" id="questionsJson">
+
+    <!-- Quiz Details Section -->
+    <div class="bg-white border rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Quiz Details</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for field in form %}
+          {% if field.name != 'csv_file' %}
+            <div class="{% if field.name == 'description' or field.name == 'guidelines' %}md:col-span-2{% endif %}">
+              <label class="block font-medium mb-1">
+                {{ field.label }}
+                {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+              </label>
+              {{ field }}
+              {% if field.help_text %}
+                <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+              {% endif %}
+              {% for error in field.errors %}
+                <p class="text-sm text-red-600">{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- CSV Upload Section -->
+    <div class="bg-white border rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Upload Questions via CSV (Optional)</h2>
+      
+      <div class="mb-4">
+        <label class="block font-medium mb-1">{{ form.csv_file.label }}</label>
+        {{ form.csv_file }}
+        {% if form.csv_file.help_text %}
+          <p class="text-sm text-gray-500 mt-1">{{ form.csv_file.help_text }}</p>
+        {% endif %}
+        {% for error in form.csv_file.errors %}
+          <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <button
+        type="submit"
+        name="upload_csv"
+        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Upload & Preview CSV
+      </button>
+    </div>
+
+    <!-- CSV Errors -->
+    {% if csv_errors %}
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-3 text-red-600">CSV Errors Found</h3>
+        <ul class="list-disc pl-6 text-red-700 space-y-1">
+          {% for error in csv_errors %}
+            <li>
+              Row {{ error.row }}:
+              {% if error.errors %}
+                {{ error.errors|join:", " }}
+              {% else %}
+                {{ error.error }}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="mt-3 text-sm text-gray-600">
+          You can fix these errors and re-upload, or continue creating the quiz manually below.
+        </p>
+      </div>
+    {% endif %}
+
+    <!-- Questions Preview/Editor Section -->
+    <div class="bg-white border rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Quiz Questions</h2>
+      
+      {% if csv_preview_data %}
+        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+          <p class="text-sm text-blue-800">
+            <strong>{{ csv_preview_data|length }}</strong> question(s) loaded from CSV. 
+            Review and edit them below before creating the quiz.
+          </p>
+        </div>
+      {% endif %}
+
+      <div id="questionsContainer" class="space-y-4">
+        {% if csv_preview_data %}
+          {% for q_data in csv_preview_data %}
+            <div class="question-item border rounded p-4" data-index="{{ forloop.counter0 }}">
+              <div class="flex justify-between items-start mb-3">
+                <h4 class="font-semibold">Question {{ forloop.counter }}</h4>
+                <button type="button" class="remove-question text-red-600 hover:text-red-800" onclick="removeQuestion(this)">
+                  Remove
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block font-medium mb-1">Question Text *</label>
+                  <textarea 
+                    name="question_text_{{ forloop.counter0 }}" 
+                    class="w-full p-2 border rounded question-text"
+                    rows="2"
+                    required
+                  >{{ q_data.question_text }}</textarea>
+                </div>
+                
+                <div>
+                  <label class="block font-medium mb-1">Question Type *</label>
+                  <select 
+                    name="question_type_{{ forloop.counter0 }}" 
+                    class="w-full p-2 border rounded question-type"
+                    required
+                  >
+                    <option value="single" {% if q_data.question_type == 'single' %}selected{% endif %}>Single Answer</option>
+                    <option value="multiple" {% if q_data.question_type == 'multiple' %}selected{% endif %}>Multiple Answer</option>
+                  </select>
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label class="block font-medium mb-1">Options *</label>
+                  <div class="space-y-2">
+                    {% for opt in q_data.options %}
+                      <div class="flex items-center gap-2">
+                        <input 
+                          type="{% if q_data.question_type == 'single' %}radio{% else %}checkbox{% endif %}"
+                          name="correct_{{ forloop.parentloop.counter0 }}"
+                          value="{{ opt }}"
+                          class="correct-option"
+                          {% if opt in q_data.correct_options %}checked{% endif %}
+                        >
+                        <input 
+                          type="text" 
+                          value="{{ opt }}"
+                          class="flex-1 p-2 border rounded option-text"
+                          placeholder="Option {{ forloop.counter }}"
+                        >
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label class="block font-medium mb-1">Explanation (Correct Answer)</label>
+                  <textarea 
+                    name="explanation_correct_{{ forloop.counter0 }}"
+                    class="w-full p-2 border rounded"
+                    rows="2"
+                  >{{ q_data.explanation_correct }}</textarea>
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label class="block font-medium mb-1">Explanation (Wrong Answer)</label>
+                  <textarea 
+                    name="explanation_wrong_{{ forloop.counter0 }}"
+                    class="w-full p-2 border rounded"
+                    rows="2"
+                  >{{ q_data.explanation_wrong }}</textarea>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-gray-500 text-center py-8">
+            No questions yet. Upload a CSV file or add questions manually.
+          </p>
+        {% endif %}
+      </div>
+
+      <button
+        type="button"
+        onclick="addQuestion()"
+        class="mt-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+      >
+        + Add Question Manually
+      </button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-4">
+      <button
+        type="submit"
+        name="create_quiz"
+        onclick="document.getElementById('actionInput').value='create_quiz'; collectQuestions();"
+        class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Create Quiz
+      </button>
+      
+      <a
+        href="{% url 'admin:index' %}"
+        class="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+function addQuestion() {
+  const container = document.getElementById('questionsContainer');
+  const index = container.children.length;
+  const questionHtml = `
+    <div class="question-item border rounded p-4" data-index="${index}">
+      <div class="flex justify-between items-start mb-3">
+        <h4 class="font-semibold">Question ${index + 1}</h4>
+        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeQuestion(this)">
+          Remove
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block font-medium mb-1">Question Text *</label>
+          <textarea name="question_text_${index}" class="w-full p-2 border rounded question-text" rows="2" required></textarea>
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Question Type *</label>
+          <select name="question_type_${index}" class="w-full p-2 border rounded question-type" required>
+            <option value="single">Single Answer</option>
+            <option value="multiple">Multiple Answer</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-medium mb-1">Options *</label>
+          <div class="space-y-2">
+            ${[1,2,3,4].map(i => `
+              <div class="flex items-center gap-2">
+                <input type="checkbox" name="correct_${index}" value="option${i}" class="correct-option">
+                <input type="text" name="option_${index}_${i}" class="flex-1 p-2 border rounded option-text" placeholder="Option ${i}">
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-medium mb-1">Explanation (Correct Answer)</label>
+          <textarea name="explanation_correct_${index}" class="w-full p-2 border rounded" rows="2"></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-medium mb-1">Explanation (Wrong Answer)</label>
+          <textarea name="explanation_wrong_${index}" class="w-full p-2 border rounded" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', questionHtml);
+}
+
+function removeQuestion(btn) {
+  btn.closest('.question-item').remove();
+  updateQuestionNumbers();
+}
+
+function updateQuestionNumbers() {
+  const items = document.querySelectorAll('.question-item');
+  items.forEach((item, index) => {
+    item.querySelector('h4').textContent = `Question ${index + 1}`;
+  });
+}
+
+function collectQuestions() {
+  const questions = [];
+  const items = document.querySelectorAll('.question-item');
+  
+  items.forEach((item, index) => {
+    const questionText = item.querySelector('.question-text').value.trim();
+    if (!questionText) return;
+    
+    const questionType = item.querySelector('.question-type').value;
+    const options = [];
+    const correctOptions = [];
+    
+    item.querySelectorAll('.option-text').forEach((optInput, optIdx) => {
+      const optText = optInput.value.trim();
+      if (optText) {
+        options.push(optText);
+        // Check if this option is marked as correct
+        const correctCheckbox = item.querySelectorAll('.correct-option')[optIdx];
+        if (correctCheckbox && correctCheckbox.checked) {
+          correctOptions.push(optText);
+        }
+      }
+    });
+    
+    if (options.length > 0) {
+      const explanationCorrect = item.querySelector(`textarea[name*="explanation_correct"]`)?.value || '';
+      const explanationWrong = item.querySelector(`textarea[name*="explanation_wrong"]`)?.value || '';
+      
+      questions.push({
+        question_text: questionText,
+        question_type: questionType,
+        options: options,
+        correct_options: correctOptions,
+        explanation_correct: explanationCorrect,
+        explanation_wrong: explanationWrong,
+      });
+    }
+  });
+  
+  document.getElementById('questionsJson').value = JSON.stringify(questions);
+}
+</script>
+{% endblock %}
+

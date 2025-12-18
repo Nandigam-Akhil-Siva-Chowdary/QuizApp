@@ -6,6 +6,14 @@ class Quiz(models.Model):
     description = models.TextField(blank=True)
     guidelines = models.TextField(blank=True)
 
+    # Event this quiz belongs to (matches NexusOfThings event.name)
+    event_name = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Event name, e.g. InnovWEB, SensorShowDown, IdeaArena, Error Erase",
+    )
+
     # Quiz rules
     time_limit_minutes = models.PositiveIntegerField(
         help_text="Time limit in minutes"

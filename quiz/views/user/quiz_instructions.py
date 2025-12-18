@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from bson import ObjectId
 
 from quiz.models.quiz import Quiz
 from quiz.services.quiz_service import QuizService
@@ -17,7 +16,8 @@ def quiz_instructions_view(request, quiz_id):
         messages.error(request, "Please login to continue.")
         return redirect("quiz:email_login")
 
-    quiz = get_object_or_404(Quiz, id=ObjectId(quiz_id))
+    # Quiz primary key is an integer (Djongo BigAutoField)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
     now = timezone.now()
 
     if not quiz.is_live(now):
@@ -39,7 +39,7 @@ def quiz_instructions_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/user/quiz_instructions.html",
+        "user/quiz_instructions.html",  # matches quiz/templates/user/quiz_instructions.html
         {
             "quiz": quiz,
             "quiz_user": quiz_user,

@@ -20,7 +20,7 @@ def quiz_results_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/admin/quiz_results.html",
+        "admin/quiz_results.html",
         {
             "quiz": quiz,
             "attempts": attempts,

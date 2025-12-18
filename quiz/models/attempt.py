@@ -42,8 +42,8 @@ class QuizAttempt(models.Model):
     devtools_violations = models.PositiveIntegerField(default=0)
 
     # Order persistence (critical for fairness)
-    question_order = models.JSONField(default=list)
-    option_order_map = models.JSONField(default=dict)
+    question_order = djongo_models.JSONField(default=list)
+    option_order_map = djongo_models.JSONField(default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

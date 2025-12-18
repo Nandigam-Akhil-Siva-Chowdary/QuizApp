@@ -2,11 +2,17 @@ from django.urls import path
 
 # Admin views
 from quiz.views.admin.quiz_create import quiz_create_view
+from quiz.views.admin.unified_quiz_create import unified_quiz_create_view
 from quiz.views.admin.quiz_edit import quiz_edit_view
 from quiz.views.admin.quiz_csv_upload import quiz_csv_upload_view
 from quiz.views.admin.quiz_results import quiz_results_view
 from quiz.views.admin.certificate_admin import certificate_review_view
 from quiz.views.admin.quiz_delete import quiz_delete_view
+from quiz.views.admin.admin_portal import (
+    admin_login_view,
+    admin_logout_view,
+    admin_dashboard_view,
+)
 
 # Auth views
 from quiz.views.auth.email_login import email_login_view
@@ -46,7 +52,12 @@ urlpatterns = [
     # --------------------
     # ADMIN
     # --------------------
-    path("admin/quiz/create/", quiz_create_view, name="quiz_create"),
+    path("quiz-admin/login/", admin_login_view, name="admin_login"),
+    path("quiz-admin/logout/", admin_logout_view, name="admin_logout"),
+    path("quiz-admin/", admin_dashboard_view, name="admin_dashboard"),
+
+    path("admin/quiz/create/", unified_quiz_create_view, name="quiz_create"),
+    path("admin/quiz/create-old/", quiz_create_view, name="quiz_create_old"),  # Keep old for reference
     path("admin/quiz/<str:quiz_id>/edit/", quiz_edit_view, name="quiz_edit"),
     path("admin/quiz/<str:quiz_id>/csv/", quiz_csv_upload_view, name="quiz_csv_upload"),
     path("admin/quiz/<str:quiz_id>/results/", quiz_results_view, name="quiz_results"),

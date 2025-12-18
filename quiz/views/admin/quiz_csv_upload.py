@@ -2,7 +2,6 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from bson import ObjectId
 
 from quiz.models.quiz import Quiz
 from quiz.models.question import QuizQuestion, QuizOption
@@ -17,7 +16,8 @@ def quiz_csv_upload_view(request, quiz_id):
     Parses and validates CSV but does NOT save questions yet.
     """
 
-    quiz = get_object_or_404(Quiz, id=ObjectId(quiz_id))
+    # Quiz primary key is an integer (Djongo BigAutoField)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
 
     if request.method == "POST":
         form = QuizCSVUploadForm(request.POST, request.FILES)
@@ -40,13 +40,15 @@ def quiz_csv_upload_view(request, quiz_id):
 
                 created = 0
                 for row in preview_rows:
+                    # Djongo ArrayField expects list of dicts
                     options = []
                     correct_set = {opt.strip() for opt in row.get("correct_options", [])}
                     for text in row.get("options", []):
-                        options.append(QuizOption(
-                            text=text,
-                            is_correct=text in correct_set
-                        ))
+                        if text:
+                            options.append({
+                                "text": text,
+                                "is_correct": text in correct_set,
+                            })
 
                     QuizQuestion.objects.create(
                         quiz_id=quiz.id,
@@ -71,7 +73,7 @@ def quiz_csv_upload_view(request, quiz_id):
                 )
                 return render(
                     request,
-                    "quiz/admin/quiz_csv_upload.html",
+                    "admin/quiz_csv_upload.html",
                     {
                         "quiz": quiz,
                         "form": form,
@@ -84,7 +86,7 @@ def quiz_csv_upload_view(request, quiz_id):
             # No errors → show preview and ask for confirmation to create
             return render(
                 request,
-                "quiz/admin/quiz_csv_upload.html",
+                "admin/quiz_csv_upload.html",
                 {
                     "quiz": quiz,
                     "form": form,
@@ -98,7 +100,7 @@ def quiz_csv_upload_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/admin/quiz_csv_upload.html",
+        "admin/quiz_csv_upload.html",
         {
             "quiz": quiz,
             "form": form,

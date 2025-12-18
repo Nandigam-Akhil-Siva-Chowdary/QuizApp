@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from bson import ObjectId
 
 from quiz.models.quiz import Quiz
 from quiz.models.question import QuizQuestion
@@ -14,7 +13,8 @@ def quiz_edit_view(request, quiz_id):
     Admin view to edit quiz configuration and manage questions.
     """
 
-    quiz = get_object_or_404(Quiz, id=ObjectId(quiz_id))
+    # Quiz primary key is an integer (Djongo BigAutoField)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
 
     if request.method == "POST":
         form = QuizForm(request.POST, instance=quiz)
@@ -31,7 +31,7 @@ def quiz_edit_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/admin/quiz_edit.html",
+        "admin/quiz_edit.html",
         {
             "quiz": quiz,
             "form": form,

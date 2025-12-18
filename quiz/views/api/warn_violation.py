@@ -34,7 +34,20 @@ def warn_violation_view(request):
             violation_type=violation_type
         )
 
-        return JsonResponse({"success": True})
+        # Refresh attempt to get updated counts
+        attempt.refresh_from_db()
+
+        # Check if disqualified
+        is_disqualified = attempt.status == QuizAttempt.STATUS_DISQUALIFIED
+
+        return JsonResponse({
+            "success": True,
+            "warnings_used": attempt.warnings_used,
+            "fullscreen_violations": attempt.fullscreen_violations,
+            "devtools_violations": attempt.devtools_violations,
+            "warnings_allowed": quiz.warnings_allowed,
+            "is_disqualified": is_disqualified,
+        })
 
     except QuizAttempt.DoesNotExist:
         return JsonResponse(

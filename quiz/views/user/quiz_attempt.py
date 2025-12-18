@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from bson import ObjectId
 
 from quiz.models.quiz import Quiz
 from quiz.models.attempt import QuizAttempt
@@ -19,7 +18,8 @@ def quiz_attempt_view(request, quiz_id):
         messages.error(request, "Please login to continue.")
         return redirect("quiz:email_login")
 
-    quiz = get_object_or_404(Quiz, id=ObjectId(quiz_id))
+    # Quiz primary key is an integer (Djongo BigAutoField)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
     now = timezone.now()
 
     if not quiz.is_live(now):
@@ -65,11 +65,14 @@ def quiz_attempt_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/user/quiz_attempt.html",
+        "user/quiz_attempt.html",
         {
             "quiz": quiz,
             "attempt": attempt,
             "questions": questions,
             "remaining_seconds": int(remaining_seconds),
+            "warnings_allowed": quiz.warnings_allowed,
+            "warnings_used": attempt.warnings_used,
+            "fullscreen_violations": attempt.fullscreen_violations,
         }
     )

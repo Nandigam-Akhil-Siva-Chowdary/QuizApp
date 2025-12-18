@@ -1,0 +1,7 @@
+question_text,question_type,option1,option2,option3,option4,correct_options,explanation_correct,explanation_wrong
+"What does HTTP stand for?","single","HyperText Transfer Protocol","High Transfer Text Protocol","Hyperlink Transfer Process","Host Transfer Text Protocol","HyperText Transfer Protocol","HTTP is the protocol used for transferring web pages on the internet.","The other options are incorrect expansions of HTTP."
+"Which of the following are JavaScript frameworks?","multiple","React","Django","Vue","Laravel","React,Vue","React and Vue are popular JavaScript frontend frameworks.","Django and Laravel are backend web frameworks, not JavaScript frameworks."
+"In HTML, which tag is used to create a hyperlink?","single","<a>","<link>","<href>","<url>","<a>","The <a> tag defines a hyperlink in HTML.","The other tags are invalid or used for different purposes."
+"Which of these are valid HTTP methods?","multiple","GET","FETCH","POST","SEND","GET,POST","GET and POST are standard HTTP methods defined in the HTTP specification.","FETCH and SEND are not standard HTTP method names."
+
+

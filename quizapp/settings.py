@@ -70,7 +70,7 @@ WSGI_APPLICATION = "quizapp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "djongo",
-        "NAME": os.getenv("MONGO_DB_NAME", "NexusOfThings"),
+        "NAME": os.getenv("MONGO_DB_NAME", "QuizApp"),
         "CLIENT": {
             "host": os.getenv("MONGO_URI"),
         }

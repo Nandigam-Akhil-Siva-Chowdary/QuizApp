@@ -28,7 +28,7 @@ def quiz_create_view(request):
 
     return render(
         request,
-        "quiz/admin/quiz_create.html",
+        "admin/quiz_create.html",
         {
             "form": form
         }

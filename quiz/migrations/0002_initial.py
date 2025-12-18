@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
             name='QuizAnswer',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('selected_option_ids', models.JSONField(default=list)),
+                ('selected_option_ids', djongo.models.fields.JSONField(default=list)),
                 ('is_marked_for_review', models.BooleanField(default=False)),
                 ('answered_at', models.DateTimeField(auto_now=True)),
             ],
@@ -83,8 +83,8 @@ class Migration(migrations.Migration):
                 ('warnings_used', models.PositiveIntegerField(default=0)),
                 ('fullscreen_violations', models.PositiveIntegerField(default=0)),
                 ('devtools_violations', models.PositiveIntegerField(default=0)),
-                ('question_order', models.JSONField(default=list)),
-                ('option_order_map', models.JSONField(default=dict)),
+                ('question_order', djongo.models.fields.JSONField(default=list)),
+                ('option_order_map', djongo.models.fields.JSONField(default=dict)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={

@@ -39,7 +39,7 @@ def quiz_delete_view(request, quiz_id):
 
     return render(
         request,
-        "quiz/admin/quiz_delete_confirm.html",
+        "admin/quiz_delete_confirm.html",
         {
             "quiz": quiz
         }

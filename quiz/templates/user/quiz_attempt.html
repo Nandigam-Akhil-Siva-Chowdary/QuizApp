@@ -51,13 +51,17 @@
           {% for opt in question.options %}
             <label class="flex items-center gap-3 cursor-pointer">
               <input
-                type="{{ question.question_type == 'multiple'|yesno:'checkbox,radio' }}"
+                {% if question.question_type == "multiple" %}
+                  type="checkbox"
+                {% else %}
+                  type="radio"
+                {% endif %}
                 name="question_{{ question.id }}"
-                value="{{ opt.id }}"
+                value="{{ opt.text|default:opt.id }}"
                 class="w-4 h-4 answer-input"
                 data-question-id="{{ question.id }}"
               />
-              <span>{{ opt.text }}</span>
+              <span>{{ opt.text|default:opt.id }}</span>
             </label>
           {% endfor %}
         </div>
@@ -114,13 +118,21 @@
   window.ATTEMPT_ID = "{{ attempt.id }}";
   window.QUIZ_REMAINING_SECONDS = "{{ remaining_seconds }}";
   window.CSRF_TOKEN = "{{ csrf_token }}";
+  window.WARNINGS_ALLOWED = {{ warnings_allowed }};
+  window.WARNINGS_USED = {{ warnings_used }};
+  window.FULLSCREEN_VIOLATIONS = {{ fullscreen_violations }};
+  window.QUIZ_HOME_URL = "{% url 'quiz:quiz_home' %}";
 
   window.SAVE_ANSWER_URL = "{% url 'quiz:save_answer' %}";
   window.MARK_REVIEW_URL = "{% url 'quiz:mark_review' %}";
   window.WARN_VIOLATION_URL = "{% url 'quiz:warn_violation' %}";
   window.AUTO_SUBMIT_URL = "{% url 'quiz:auto_submit' %}";
   window.SUBMIT_QUIZ_URL = "{% url 'quiz:quiz_submit' %}";
-  window.SUBMIT_REDIRECT_URL = "{% url 'quiz:quiz_result' attempt.id %}";
+  {% if attempt.id %}
+    window.SUBMIT_REDIRECT_URL = "{% url 'quiz:quiz_result' attempt.id %}";
+  {% else %}
+    window.SUBMIT_REDIRECT_URL = "";
+  {% endif %}
 </script>
 
 <!-- CORE JS -->

@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Admin Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="w-full max-w-md bg-white rounded shadow p-6">
+    <h1 class="text-2xl font-semibold text-center mb-6">
+      Quiz Admin Portal
+    </h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 p-3 rounded {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block font-medium mb-1">
+          Username
+        </label>
+        <input
+          type="text"
+          name="username"
+          required
+          class="w-full p-2 border rounded"
+          placeholder="Admin username"
+        />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">
+          Password
+        </label>
+        <input
+          type="password"
+          name="password"
+          required
+          class="w-full p-2 border rounded"
+          placeholder="Password"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Login
+      </button>
+    </form>
+
+    <p class="mt-4 text-xs text-gray-500 text-center">
+      Use the Django admin credentials for this portal.
+    </p>
+  </div>
+</body>
+</html>
+
+

@@ -8,28 +8,288 @@
   <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <div class="max-w-3xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto p-6">
     <div class="bg-white rounded shadow p-6">
-      <h1 class="text-2xl font-semibold mb-4">Confirm Your Details</h1>
+      <h1 class="text-2xl font-semibold mb-4">Confirm Your Registration Details</h1>
 
-      <p class="text-gray-600 mb-4">
-        Team: <strong>{{ quiz_user.team_name }}</strong> ({{ quiz_user.team_code }}) — {{ quiz_user.team_lead_email }}
-      </p>
-
-      <form method="post" class="space-y-4">
-        {% csrf_token %}
-        {% for field in form %}
+      <!-- Display Registration Info -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-4 mb-6">
+        <h2 class="font-semibold text-lg mb-2">Your Registration Information</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <label class="block font-medium mb-1">{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}
-              <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
-            {% endif %}
-            {% for error in field.errors %}
+            <strong>Team Name:</strong> {{ quiz_user.team_name }}
+          </div>
+          <div>
+            <strong>Team Code:</strong> {{ quiz_user.team_code }}
+          </div>
+          <div>
+            <strong>Event:</strong> {{ quiz_user.event }}
+          </div>
+          <div>
+            <strong>Team Lead:</strong> {{ quiz_user.team_lead_name }}
+          </div>
+          <div>
+            <strong>Email:</strong> {{ quiz_user.team_lead_email }}
+          </div>
+          <div>
+            <strong>College:</strong> {{ quiz_user.college_name }}
+          </div>
+          {% if quiz_user.teammate1_name %}
+          <div>
+            <strong>Teammate 1:</strong> {{ quiz_user.teammate1_name }}
+          </div>
+          {% endif %}
+          {% if quiz_user.teammate2_name %}
+          <div>
+            <strong>Teammate 2:</strong> {{ quiz_user.teammate2_name }}
+          </div>
+          {% endif %}
+          {% if quiz_user.teammate3_name %}
+          <div>
+            <strong>Teammate 3:</strong> {{ quiz_user.teammate3_name }}
+          </div>
+          {% endif %}
+          {% if quiz_user.teammate4_name %}
+          <div>
+            <strong>Teammate 4:</strong> {{ quiz_user.teammate4_name }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <form method="post" class="space-y-4" id="registrationForm">
+        {% csrf_token %}
+
+        <!-- Team Lead -->
+        <div class="border-t pt-4 mb-4">
+          <h3 class="font-semibold text-lg mb-3">Team Lead</h3>
+          <p class="text-sm text-gray-700 mb-2">
+            <strong>{{ quiz_user.team_lead_name }}</strong> — {{ quiz_user.college_name }}
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-medium mb-1">{{ form.team_lead_roll.label }} *</label>
+              {{ form.team_lead_roll }}
+              {% for error in form.team_lead_roll.errors %}
+                <p class="text-sm text-red-600">{{ error }}</p>
+              {% endfor %}
+            </div>
+            <div class="flex items-center mt-6">
+              <label class="flex items-center">
+                {{ form.team_lead_same_college }}
+                <span class="ml-2 text-sm">Same college as registration ({{ quiz_user.college_name }})</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teammates (up to 4) -->
+        <div class="border-t pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-lg">Team Members (up to 4)</h3>
+            <button
+              type="button"
+              id="addMemberBtn"
+              class="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-gray-800"
+            >
+              + Add Team Member
+            </button>
+          </div>
+
+          <div id="teammatesWrapper" class="space-y-4">
+            <!-- Member 1 -->
+            <div
+              class="teammate-row border rounded p-4 {% if not form.teammate1_name.value %}hidden{% endif %}"
+              data-index="1"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-sm">Member 1</h4>
+                <button
+                  type="button"
+                  class="text-xs text-red-600 hover:text-red-800"
+                  onclick="removeTeammateRow(this)"
+                >
+                  Remove
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate1_name.label }}</label>
+                  {{ form.teammate1_name }}
+                  {% for error in form.teammate1_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate1_roll.label }}</label>
+                  {{ form.teammate1_roll }}
+                  {% for error in form.teammate1_roll.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    {{ form.teammate1_same_college }}
+                    <span class="ml-2 text-sm">{{ form.teammate1_same_college.label }}</span>
+                  </label>
+                </div>
+                <div class="md:col-span-2 teammate-college-field {% if form.teammate1_same_college.value or form.teammate1_same_college.value is None %}hidden{% endif %}">
+                  <label class="block font-medium mb-1">{{ form.teammate1_college_name.label }}</label>
+                  {{ form.teammate1_college_name }}
+                  {% for error in form.teammate1_college_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Member 2 -->
+            <div
+              class="teammate-row border rounded p-4 {% if not form.teammate2_name.value %}hidden{% endif %}"
+              data-index="2"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-sm">Member 2</h4>
+                <button
+                  type="button"
+                  class="text-xs text-red-600 hover:text-red-800"
+                  onclick="removeTeammateRow(this)"
+                >
+                  Remove
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate2_name.label }}</label>
+                  {{ form.teammate2_name }}
+                  {% for error in form.teammate2_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate2_roll.label }}</label>
+                  {{ form.teammate2_roll }}
+                  {% for error in form.teammate2_roll.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    {{ form.teammate2_same_college }}
+                    <span class="ml-2 text-sm">{{ form.teammate2_same_college.label }}</span>
+                  </label>
+                </div>
+                <div class="md:col-span-2 teammate-college-field {% if form.teammate2_same_college.value or form.teammate2_same_college.value is None %}hidden{% endif %}">
+                  <label class="block font-medium mb-1">{{ form.teammate2_college_name.label }}</label>
+                  {{ form.teammate2_college_name }}
+                  {% for error in form.teammate2_college_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Member 3 -->
+            <div
+              class="teammate-row border rounded p-4 {% if not form.teammate3_name.value %}hidden{% endif %}"
+              data-index="3"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-sm">Member 3</h4>
+                <button
+                  type="button"
+                  class="text-xs text-red-600 hover:text-red-800"
+                  onclick="removeTeammateRow(this)"
+                >
+                  Remove
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate3_name.label }}</label>
+                  {{ form.teammate3_name }}
+                  {% for error in form.teammate3_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate3_roll.label }}</label>
+                  {{ form.teammate3_roll }}
+                  {% for error in form.teammate3_roll.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    {{ form.teammate3_same_college }}
+                    <span class="ml-2 text-sm">{{ form.teammate3_same_college.label }}</span>
+                  </label>
+                </div>
+                <div class="md:col-span-2 teammate-college-field {% if form.teammate3_same_college.value or form.teammate3_same_college.value is None %}hidden{% endif %}">
+                  <label class="block font-medium mb-1">{{ form.teammate3_college_name.label }}</label>
+                  {{ form.teammate3_college_name }}
+                  {% for error in form.teammate3_college_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Member 4 -->
+            <div
+              class="teammate-row border rounded p-4 {% if not form.teammate4_name.value %}hidden{% endif %}"
+              data-index="4"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-sm">Member 4</h4>
+                <button
+                  type="button"
+                  class="text-xs text-red-600 hover:text-red-800"
+                  onclick="removeTeammateRow(this)"
+                >
+                  Remove
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate4_name.label }}</label>
+                  {{ form.teammate4_name }}
+                  {% for error in form.teammate4_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">{{ form.teammate4_roll.label }}</label>
+                  {{ form.teammate4_roll }}
+                  {% for error in form.teammate4_roll.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    {{ form.teammate4_same_college }}
+                    <span class="ml-2 text-sm">{{ form.teammate4_same_college.label }}</span>
+                  </label>
+                </div>
+                <div class="md:col-span-2 teammate-college-field {% if form.teammate4_same_college.value or form.teammate4_same_college.value is None %}hidden{% endif %}">
+                  <label class="block font-medium mb-1">{{ form.teammate4_college_name.label }}</label>
+                  {{ form.teammate4_college_name }}
+                  {% for error in form.teammate4_college_name.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="bg-red-50 border border-red-200 rounded p-3">
+            {% for error in form.non_field_errors %}
               <p class="text-sm text-red-600">{{ error }}</p>
             {% endfor %}
           </div>
-        {% endfor %}
+        {% endif %}
 
         <div class="flex justify-between items-center mt-6">
           <a href="{% url 'quiz:email_login' %}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
@@ -45,6 +305,61 @@
       </form>
     </div>
   </div>
+
+  <script>
+    function getVisibleTeammateRows() {
+      return Array.from(document.querySelectorAll('.teammate-row')).filter(
+        (row) => !row.classList.contains('hidden')
+      );
+    }
+
+    function addTeammateRow() {
+      const rows = document.querySelectorAll('.teammate-row');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].classList.contains('hidden')) {
+          rows[i].classList.remove('hidden');
+          return;
+        }
+      }
+      alert('You can add up to 4 team members only.');
+    }
+
+    function removeTeammateRow(btn) {
+      const row = btn.closest('.teammate-row');
+      if (row) {
+        // Clear inputs
+        row.querySelectorAll('input[type="text"]').forEach((el) => (el.value = ''));
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox) checkbox.checked = true;
+        row.classList.add('hidden');
+      }
+    }
+
+    function initTeammateCollegeToggles() {
+      document.querySelectorAll('.teammate-row').forEach((row) => {
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        const collegeField = row.querySelector('.teammate-college-field');
+        if (!checkbox || !collegeField) return;
+
+        const updateVisibility = () => {
+          if (checkbox.checked) {
+            collegeField.classList.add('hidden');
+          } else {
+            collegeField.classList.remove('hidden');
+          }
+        };
+
+        checkbox.addEventListener('change', updateVisibility);
+        updateVisibility();
+      });
+    }
+
+    document.getElementById('addMemberBtn').addEventListener('click', addTeammateRow);
+    window.removeTeammateRow = removeTeammateRow;
+
+    // Initialize on load
+    initTeammateCollegeToggles();
+  </script>
 </body>
 </html>
 

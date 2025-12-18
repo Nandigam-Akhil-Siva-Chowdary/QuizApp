@@ -1,6 +1,5 @@
 import random
 from django.utils import timezone
-from bson import ObjectId
 
 from quiz.models.quiz import Quiz
 from quiz.models.question import QuizQuestion
@@ -10,8 +9,11 @@ from quiz.models.attempt import QuizAttempt
 class QuizService:
     @staticmethod
     def get_quiz_or_404(quiz_id):
+        """
+        Helper to fetch an active quiz by integer primary key.
+        """
         try:
-            return Quiz.objects.get(id=ObjectId(quiz_id), is_active=True)
+            return Quiz.objects.get(pk=quiz_id, is_active=True)
         except Quiz.DoesNotExist:
             return None
 
@@ -22,12 +24,22 @@ class QuizService:
 
     @staticmethod
     def can_attempt_quiz(quiz: Quiz, team_code: str) -> bool:
-        attempts = QuizAttempt.objects.filter(
+        """
+        Allow a new attempt only if completed attempts are below max_attempts.
+        Active attempts are handled separately (resume logic), so we only count
+        finished or disqualified attempts here.
+        """
+        used_attempts = QuizAttempt.objects.filter(
             quiz_id=quiz.id,
-            team_code=team_code
+            team_code=team_code,
+            status__in=[
+                QuizAttempt.STATUS_SUBMITTED,
+                QuizAttempt.STATUS_AUTO_SUBMITTED,
+                QuizAttempt.STATUS_DISQUALIFIED,
+            ]
         ).count()
 
-        return attempts < quiz.max_attempts
+        return used_attempts < quiz.max_attempts
 
     @staticmethod
     def create_attempt(
@@ -62,7 +74,8 @@ class QuizService:
         option_order_map = {}
 
         for q in questions:
-            option_ids = [str(opt.id) for opt in q.options]
+            # options are stored as list of dicts, not model instances
+            option_ids = [opt.get("text") for opt in q.options if opt.get("text")]
 
             if quiz.shuffle_options:
                 random.shuffle(option_ids)
@@ -103,10 +116,16 @@ class QuizService:
 
             # Apply stored option order
             ordered_options = []
-            option_map = {str(opt.id): opt for opt in q.options}
+            option_map = {}
+            for opt in q.options:
+                key = opt.get("text") or str(opt.get("id"))
+                if key:
+                    option_map[key] = opt
             for oid in attempt.option_order_map.get(qid, []):
                 opt = option_map.get(oid)
                 if opt:
+                    if "id" not in opt:
+                        opt["id"] = oid
                     ordered_options.append(opt)
 
             q.options = ordered_options

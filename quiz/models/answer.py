@@ -12,7 +12,7 @@ class QuizAnswer(models.Model):
 
     # For single choice → list with 1 item
     # For multiple choice → list with many items
-    selected_option_ids = models.JSONField(default=list)
+    selected_option_ids = djongo_models.JSONField(default=list)
 
     is_marked_for_review = models.BooleanField(default=False)
 

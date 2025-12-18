@@ -35,9 +35,11 @@ class AttemptService:
         attempt.save()
 
         # Enforce limits
+        # Fullscreen: after 2 warnings (warnings_allowed=2), 3rd violation exits
+        # So fullscreen_violations > warnings_allowed means >= 3 violations
         if (
             attempt.warnings_used > quiz.warnings_allowed
-            or attempt.fullscreen_violations > quiz.warnings_allowed
+            or attempt.fullscreen_violations > quiz.warnings_allowed  # 3rd violation when warnings_allowed=2
             or attempt.devtools_violations >= 2
         ):
             AttemptService.disqualify_attempt(attempt)
